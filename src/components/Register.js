@@ -1,52 +1,69 @@
 import { Fragment, useContext, useEffect } from "react"
 import { Button, TextField } from "@mui/material"
 import FormContext from "./../store/FormContext"
+import useInput from "./../hooks/useInput"
+
 const Register = () => {
 
-    const { nameState, emailState, phoneNumberState,
-        setNameState, setEmailState, setPhoneNumberState
-        , isFormValid, setFormValid,
-        isEmailStateValid, setEmailStateValid
-        , isPhoneNumberStateValid, setPhoneNumberStateValid, setNameStateValid, isNameStateValid } = useContext(FormContext);
+    // Validations for Custom Hook:
+    const nameValidation = (value) => value.length >= 8
+    const phoneValidation = (value) => value.length === 11
+    const emailValidation = (value) => value.includes("@")
 
-    const nameHandler = ({ target }) => setNameState(target.value)
-    const emailHandler = ({ target }) => setEmailState(target.value)
-    const phoneNumberHandler = ({ target }) => setPhoneNumberState(target.value)
+    const {
+        value: firstNameValue,
+        isValid: firstNameIsValid,
+        hasError: firstNameHasError,
+        valueChangeHandler: firstNameChangeHandler,
+        inputBlurHandler: firstNameBlurHandler,
+        reset: resetFirstName,
+    } = useInput(nameValidation);
 
 
-    const nameBlur = () => {
-        if (nameState.length < 8)
-            setNameStateValid(false)
-        else
-            setNameStateValid(true)
+    const {
+        value: phoneValue,
+        isValid: phoneIsValid,
+        hasError: phoneHasError,
+        valueChangeHandler: phoneChangeHandler,
+        inputBlurHandler: phoneBlurHandler,
+        reset: resetPhone,
+    } = useInput(phoneValidation);
+
+
+    const {
+        value: emailValue,
+        isValid: emailIsValid,
+        hasError: emailHasError,
+        valueChangeHandler: emailChangeHandler,
+        inputBlurHandler: emailBlurHandler,
+        reset: resetEmail,
+    } = useInput(emailValidation);
+
+    const formHandler = e => {
+        e.preventDefault()
+        resetFirstName()
+        resetEmail()
+        resetPhone()
+
     }
 
-    const emailBlur = () => {
-        if (emailState.length < 8)
-            setEmailStateValid(false)
-        else
-            setEmailStateValid(true)
-    }
-
-    const phoneNumberBlur = () => {
-        if (phoneNumberState.length < 4)
-            setPhoneNumberStateValid(false)
-        else
-            setPhoneNumberStateValid(true)
-    }
     return <Fragment>
-        <form>
+        <form onSubmit={formHandler}>
             <div>
-                <TextField id="filled-basic" label="Name" type="text" variant="filled" error={!isNameStateValid} helperText="Minimum length is 8 characters" value={nameState} onChange={nameHandler} onBlur={nameBlur} />
+                <TextField id="filled-basic" label="Name" type="text" variant="filled" error={firstNameHasError} helperText="Minimum length is 8 characters" value={firstNameValue}
+                    onChange={firstNameChangeHandler}
+                    onBlur={firstNameBlurHandler} />
             </div>
             <div>
-                <TextField id="filled-basic" label="Email" type="email" variant="filled" error={!isEmailStateValid} value={emailState} helperText="without .com" onChange={emailHandler} onBlur={emailBlur} />
+                <TextField id="filled-basic" label="Email" type="email" variant="filled" error={emailHasError} helperText="without .com" value={emailValue} onChange={emailChangeHandler}
+                    onBlur={emailBlurHandler} />
             </div>
             <div>
-                <TextField id="filled-basic" label="Phone Number" type="number" variant="filled" error={!isPhoneNumberStateValid} value={phoneNumberState} helperText="phone number with code" onChange={phoneNumberHandler} onBlur={phoneNumberBlur} />
+                <TextField id="filled-basic" label="Phone Number" type="number" variant="filled" error={phoneHasError} value={phoneValue} helperText="phone number with code" onChange={phoneChangeHandler}
+                    onBlur={phoneBlurHandler} />
             </div>
             <div>
-                <Button disabled={!isFormValid} variant="contained">Register</Button>
+                <Button type="submit" disabled={firstNameHasError || emailHasError || phoneHasError} variant="contained">Register</Button>
             </div>
         </form>
     </Fragment>
